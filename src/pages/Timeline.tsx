@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
+  ButtonGroup,
   createDragPointerHandler,
   IconButton,
   iconProps,
   TimeCursor,
   TimeView,
-  TransparentIconButton,
   useWidth,
 } from "@/app-ui/src";
 import * as Tone from "tone/build/esm";
@@ -18,12 +18,13 @@ import { VerticalLines } from "../components/VerticalLines";
 import { getSynth, setSynth } from ".";
 import { Strip } from "./Strip";
 import { SoundNode } from "../types/SoundNode";
-import { PlayerPlay, PlayerStop } from "tabler-icons-react";
+import { HandMove, Pencil, PlayerPlay, PlayerStop } from "tabler-icons-react";
 
 export function Timeline() {
   const [width, ref] = useWidth();
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [cursorMode, setCursorMode] = useState<"select" | "add">("select");
   const BPM = 120;
   const BPS = BPM / 60;
   const measure = 4;
@@ -95,6 +96,7 @@ export function Timeline() {
       const event = ctx.event;
       if (!(event.target instanceof HTMLElement)) return;
       if (event.target !== ref.current) return;
+      if (cursorMode === "select") return;
       const offsetY = event.clientY - event.target.getBoundingClientRect().top;
       const codeIndex = Math.floor(offsetY / BLACK_KEY_WIDTH);
       const code = codes[codes.length - codeIndex - 1];
@@ -139,15 +141,33 @@ export function Timeline() {
   const steps = [1 / BPS, (1 / BPS) * measure];
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full gap-4">
       <div className="flex justify-center">
-        <IconButton onClick={handleTogglePlay}>
-          {isPlaying ? (
-            <PlayerStop {...iconProps} />
-          ) : (
-            <PlayerPlay {...iconProps} />
-          )}
-        </IconButton>
+        <div className="flex gap-8">
+          <ButtonGroup>
+            <IconButton onClick={() => setCursorMode("select")}>
+              <HandMove
+                {...iconProps}
+                color={
+                  cursorMode === "select" ? "var(--color-primary)" : "white"
+                }
+              />
+            </IconButton>
+            <IconButton onClick={() => setCursorMode("add")}>
+              <Pencil
+                {...iconProps}
+                color={cursorMode === "add" ? "var(--color-primary)" : "white"}
+              />
+            </IconButton>
+          </ButtonGroup>
+          <IconButton onClick={handleTogglePlay}>
+            {isPlaying ? (
+              <PlayerStop {...iconProps} />
+            ) : (
+              <PlayerPlay {...iconProps} />
+            )}
+          </IconButton>
+        </div>
       </div>
       <div className="flex w-full">
         <div style={{ minWidth: "70px" }}></div>
@@ -190,7 +210,7 @@ export function Timeline() {
           {state.nodes.map((node) => {
             return <SoundNodeBox key={node.id} node={node} />;
           })}
-          <TimeCursor left={currentTime * pxPerSec} top={-20} bottom={-2}  />
+          <TimeCursor left={currentTime * pxPerSec} top={-20} bottom={-2} />
         </div>
       </div>
     </div>
