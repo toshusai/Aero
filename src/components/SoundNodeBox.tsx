@@ -6,9 +6,11 @@ import { createDragPointerHandler } from "@/app-ui/src";
 import { useDispatch } from "react-redux";
 import { actions } from "@/store/scene";
 import { octaves } from "./Keyboard";
+import { snapToBeat, useBps } from "@/pages/Timeline";
 
 export function SoundNodeBox(props: { node: SoundNode; pxPerSec: number }) {
   const dispatch = useDispatch();
+  const bps = useBps();
   const handlePointerDown = createDragPointerHandler<
     | {
         offsetX: number;
@@ -28,7 +30,7 @@ export function SoundNodeBox(props: { node: SoundNode; pxPerSec: number }) {
     onMove: (ctx) => {
       if (!ctx.pass) return;
       const time = props.node.time + ctx.diffX / props.pxPerSec;
-      const roundTime = Math.round(time * 4) / 4;
+      const roundTime = snapToBeat(time, bps);
       dispatch(
         actions.updateNode({
           node: {

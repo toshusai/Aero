@@ -6,6 +6,8 @@ export type SceneState = {
   currentTime: number;
   cursorMode: "select" | "add";
   strips: Strip[];
+  bpm: number;
+  measure: number;
 };
 
 export const sceneSlice = createSlice({
@@ -20,6 +22,8 @@ export const sceneSlice = createSlice({
     currentTime: 0,
     isPlaying: false,
     cursorMode: "select",
+    bpm: 120,
+    measure: 4,
   } as SceneState,
   reducers: {
     setPlaying(state, action) {

@@ -32,7 +32,7 @@ export function useCurrentTime() {
   ] as const;
 }
 
-function snapToBeat(time: number, BPS: number) {
+export function snapToBeat(time: number, BPS: number) {
   return Math.floor(time * BPS) / BPS;
 }
 
@@ -70,6 +70,11 @@ export function useNode(id: string) {
   ] as const;
 }
 
+export function useBps() {
+  const bpm = useSelector((state) => state.scene.bpm);
+  return bpm / 60;
+}
+
 export function Timeline() {
   const [width, ref] = useWidth();
   const [currentTime, setCurrentTime] = useCurrentTime();
@@ -78,8 +83,7 @@ export function Timeline() {
   const dispatch = useDispatch();
   const nodes = useSelector((state) => state.scene.strips[0].nodes);
 
-  const BPM = 150;
-  const BPS = BPM / 60;
+  const BPS = useBps();
   const measure = 4;
   const pxPerSec = BPS * 50;
 
