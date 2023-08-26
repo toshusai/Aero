@@ -3,6 +3,7 @@ import React from "react";
 
 import {
   BottomSpaceDiv,
+  COLOR_BACKGROUND_NAME,
   GlobalStyle,
   HeaderDiv,
   HPanel,
@@ -24,10 +25,16 @@ const IndexPage = () => {
           <HeaderDiv></HeaderDiv>
           <MainDiv>
             <VPanel
-              top={<Timeline />}
-              bottom={
-                <HPanel left={<div>left</div>} right={<div>right</div>} />
+              top={
+                <div
+                  style={{
+                    backgroundColor: `var(${COLOR_BACKGROUND_NAME})`,
+                    height: "100%",
+                    width: "100%",
+                  }}
+                ></div>
               }
+              bottom={<Timeline />}
             />
           </MainDiv>
           <BottomSpaceDiv />

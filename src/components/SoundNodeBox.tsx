@@ -1,10 +1,11 @@
 import React from "react";
-import { codes } from "../const";
+import { BLACK_KEY_WIDTH, codes } from "../const";
 import { SoundNode } from "../types/SoundNode";
 import styled from "styled-components";
 import { createDragPointerHandler } from "@/app-ui/src";
 import { useDispatch } from "react-redux";
 import { actions } from "@/store/scene";
+import { octaves } from "./Keyboard";
 
 export function SoundNodeBox(props: { node: SoundNode; pxPerSec: number }) {
   const dispatch = useDispatch();
@@ -47,12 +48,17 @@ export function SoundNodeBox(props: { node: SoundNode; pxPerSec: number }) {
           codes
             .map((x) => x)
             .reverse()
-            .indexOf(props.node.code) * 14
+            .indexOf(props.node.code) *
+            BLACK_KEY_WIDTH +
+          octaves
+            .map((x) => x)
+            .reverse()
+            .indexOf(props.node.octave) *
+            BLACK_KEY_WIDTH *
+            codes.length
         }px`,
         left: `${props.node.time * props.pxPerSec}px`,
-        width: `${
-          props.node.length ? props.node.length * props.pxPerSec : 20
-        }px`,
+        width: `${props.node.length * props.pxPerSec}px`,
       }}
     ></SoundNodeDiv>
   );
@@ -63,7 +69,7 @@ export const SoundNodeDiv = styled.div`
   background: #529de2;
   border: 1px solid #00000000;
   box-sizing: border-box;
-  height: 14px;
+  height: ${BLACK_KEY_WIDTH}px;
   width: 20px;
   z-index: 2;
 `;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   ButtonGroup,
+  COLOR_BACKGROUND_NAME,
   createDragPointerHandler,
   IconButton,
   iconProps,
@@ -9,14 +10,13 @@ import {
   useWidth,
 } from "@/app-ui/src";
 import * as Tone from "tone/build/esm";
-import { Keyboard } from "../components/Keyboard";
+import { Keyboard, octaves } from "../components/Keyboard";
 import { BLACK_KEY_WIDTH } from "../const";
 import { codes } from "../const";
 import { KeyboardLines } from "../components/KeyboardLines";
 import { SoundNodeBox } from "../components/SoundNodeBox";
 import { VerticalLines } from "../components/VerticalLines";
 import { getSynth, setSynth } from ".";
-import { Strip } from "./Strip";
 import { SoundNode } from "../types/SoundNode";
 import { HandMove, Pencil, PlayerPlay, PlayerStop } from "tabler-icons-react";
 import { useDispatch } from "react-redux";
@@ -30,6 +30,10 @@ export function useCurrentTime() {
     currentTime,
     (time: number) => dispatch(actions.setCurrentTime(time)),
   ] as const;
+}
+
+function snapToBeat(time: number, BPS: number) {
+  return Math.floor(time * BPS) / BPS;
 }
 
 export function useIsPlaying() {
@@ -74,7 +78,7 @@ export function Timeline() {
   const dispatch = useDispatch();
   const nodes = useSelector((state) => state.scene.strips[0].nodes);
 
-  const BPM = 120;
+  const BPM = 150;
   const BPS = BPM / 60;
   const measure = 4;
   const pxPerSec = BPS * 50;
@@ -142,16 +146,19 @@ export function Timeline() {
       if (cursorMode === "select") return;
       const offsetY = event.clientY - event.target.getBoundingClientRect().top;
       const codeIndex = Math.floor(offsetY / BLACK_KEY_WIDTH);
-      const code = codes[codes.length - codeIndex - 1];
+      const code = codes[codes.length - (codeIndex % codes.length) - 1];
+      const octave = octaves.length - Math.floor(codeIndex / codes.length) - 1;
+
       const clientX = event.clientX - event.target.getBoundingClientRect().left;
       const time = clientX / pxPerSec;
-      const roundTime = Math.floor(time * 4) / 4;
+      const roundTime = snapToBeat(time, BPS);
+
       const node = {
         id: Date.now().toString(),
-        octave: 4,
+        octave: octaves[octave],
         code,
         time: roundTime,
-        length: 0.25,
+        length: 1 / BPS,
       };
 
       dispatch(actions.addNode({ stripId: "1", node }));
@@ -165,8 +172,8 @@ export function Timeline() {
       const clientX =
         ctx.event.clientX - ctx.event.target.getBoundingClientRect().left;
       const time = clientX / pxPerSec;
-      const roundTime = Math.floor(time * 4) / 4;
-      const length = Math.max(roundTime - ctx.pass.node.time, 0.25);
+      const roundTime = snapToBeat(time, BPS);
+      const length = Math.max(roundTime - ctx.pass.node.time, 1 / BPS);
       dispatch(
         actions.updateNode({
           stripId: "1",
@@ -182,7 +189,12 @@ export function Timeline() {
   const steps = [1 / BPS, (1 / BPS) * measure];
 
   return (
-    <div className="flex flex-col w-full gap-4">
+    <div
+      className="flex flex-col w-full gap-4"
+      style={{
+        backgroundColor: `var(${COLOR_BACKGROUND_NAME})`,
+      }}
+    >
       <div className="flex justify-center">
         <div className="flex gap-8">
           <ButtonGroup>
@@ -231,12 +243,20 @@ export function Timeline() {
           />
         </div>
       </div>
-      <div className="flex w-full">
+      <div
+        className="flex w-full"
+        style={{
+          overflowY: "scroll",
+        }}
+      >
         <div className="flex flex-col">
           <Keyboard />
         </div>
         <div
           className="flex flex-col w-full relative"
+          style={{
+            height: "fit-content",
+          }}
           ref={ref}
           onPointerDown={handlePointerDown}
         >
