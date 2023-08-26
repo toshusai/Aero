@@ -19,29 +19,73 @@ import { getSynth, setSynth } from ".";
 import { Strip } from "./Strip";
 import { SoundNode } from "../types/SoundNode";
 import { HandMove, Pencil, PlayerPlay, PlayerStop } from "tabler-icons-react";
+import { useDispatch } from "react-redux";
+import { SceneState, actions } from "@/store/scene";
+import { useSelector } from "@/store/useSelector";
+
+export function useCurrentTime() {
+  const dispatch = useDispatch();
+  const currentTime = useSelector((state) => state.scene.currentTime);
+  return [
+    currentTime,
+    (time: number) => dispatch(actions.setCurrentTime(time)),
+  ] as const;
+}
+
+export function useIsPlaying() {
+  const dispatch = useDispatch();
+  const isPlaying = useSelector((state) => state.scene.isPlaying);
+  return [
+    isPlaying,
+    (isPlaying: boolean) => dispatch(actions.setPlaying(isPlaying)),
+  ] as const;
+}
+
+export function useCursorMode() {
+  const dispatch = useDispatch();
+  const cursorMode = useSelector((state) => state.scene.cursorMode);
+  return [
+    cursorMode,
+    (cursorMode: SceneState["cursorMode"]) =>
+      dispatch(actions.setCursorMode(cursorMode)),
+  ] as const;
+}
+
+export function useNode(id: string) {
+  const dispatch = useDispatch();
+  const node = useSelector((state) => {
+    let node: SoundNode | undefined;
+    state.scene.strips.find(
+      (strip) => (node = strip.nodes.find((node) => node.id === id))
+    );
+    return node;
+  });
+  return [
+    node,
+    (node: SoundNode) => dispatch(actions.updateNode(node)),
+  ] as const;
+}
 
 export function Timeline() {
   const [width, ref] = useWidth();
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [cursorMode, setCursorMode] = useState<"select" | "add">("select");
+  const [currentTime, setCurrentTime] = useCurrentTime();
+  const [isPlaying, setIsPlaying] = useIsPlaying();
+  const [cursorMode, setCursorMode] = useCursorMode();
+  const dispatch = useDispatch();
+  const nodes = useSelector((state) => state.scene.strips[0].nodes);
+
   const BPM = 120;
   const BPS = BPM / 60;
   const measure = 4;
   const pxPerSec = BPS * 50;
 
-  const [state, setState] = useState<Strip>({
-    id: "1",
-    nodes: [],
-  });
-
   const handleTogglePlay = async () => {
     await Tone.start();
-    setIsPlaying((isPlaying) => !isPlaying);
+    setIsPlaying(!isPlaying);
     if (!isPlaying) {
       const synth = new Tone.PolySynth(Tone.Synth).toDestination();
       const now = Tone.now();
-      state.nodes.forEach((node) => {
+      nodes.forEach((node) => {
         synth?.triggerAttackRelease(
           node.code + node.octave,
           node.length,
@@ -60,10 +104,10 @@ export function Timeline() {
       return;
     }
     let i = 0;
+    let timer = currentTime;
     const update = () => {
-      setCurrentTime((prev) => {
-        return prev + 1 / 60;
-      });
+      timer += 1 / 60;
+      setCurrentTime(timer);
 
       i = requestAnimationFrame(() => {
         update();
@@ -111,12 +155,7 @@ export function Timeline() {
         length: 0.25,
       };
 
-      setState((state) => {
-        return {
-          ...state,
-          nodes: [...state.nodes, node],
-        };
-      });
+      dispatch(actions.addNode({ stripId: "1", node }));
       return {
         node,
       };
@@ -128,13 +167,16 @@ export function Timeline() {
         ctx.event.clientX - ctx.event.target.getBoundingClientRect().left;
       const time = clientX / pxPerSec;
       const roundTime = Math.floor(time * 4) / 4;
-      ctx.pass.node.length = Math.max(roundTime - ctx.pass.node.time, 0.25);
-      setState((state) => {
-        return {
-          ...state,
-          nodes: [...state.nodes],
-        };
-      });
+      const length = Math.max(roundTime - ctx.pass.node.time, 0.25);
+      dispatch(
+        actions.updateNode({
+          stripId: "1",
+          node: {
+            ...ctx.pass.node,
+            length,
+          },
+        })
+      );
     },
   });
 
@@ -207,7 +249,7 @@ export function Timeline() {
             pxPerSec={pxPerSec}
           />
 
-          {state.nodes.map((node) => {
+          {nodes.map((node) => {
             return <SoundNodeBox key={node.id} node={node} />;
           })}
           <TimeCursor left={currentTime * pxPerSec} top={-20} bottom={-2} />
