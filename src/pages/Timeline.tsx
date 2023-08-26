@@ -166,6 +166,7 @@ export function Timeline() {
       };
 
       dispatch(actions.addNode({ stripId: "1", node }));
+      dispatch(actions.setSelectedNodeIds([node.id]));
       return {
         node,
       };

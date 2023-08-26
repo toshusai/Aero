@@ -7,6 +7,7 @@ import {
   GlobalStyle,
   HeaderDiv,
   HPanel,
+  KeyboardInput,
   MainDiv,
   RootDiv,
   VPanel,
@@ -17,6 +18,7 @@ import * as Tone from "tone/build/esm";
 import { Timeline } from "./Timeline";
 
 const IndexPage = () => {
+  KeyboardInput.init(() => {});
   return (
     <>
       <GlobalStyle />

@@ -6,6 +6,7 @@ export type SceneState = {
   currentTime: number;
   cursorMode: "select" | "add";
   strips: Strip[];
+  selectedNodeIds: string[];
   bpm: number;
   measure: number;
 };
@@ -19,6 +20,7 @@ export const sceneSlice = createSlice({
         nodes: [],
       },
     ],
+    selectedNodeIds: [],
     currentTime: 0,
     isPlaying: false,
     cursorMode: "select",
@@ -35,6 +37,9 @@ export const sceneSlice = createSlice({
     setCursorMode(state, action) {
       state.cursorMode = action.payload;
     },
+    setSelectedNodeIds(state, action) {
+      state.selectedNodeIds = action.payload;
+    },
     addNode(state, action) {
       const { stripId, node } = action.payload;
       const strip = state.strips.find((strip) => strip.id === stripId);
@@ -47,6 +52,7 @@ export const sceneSlice = createSlice({
       const strip = state.strips.find((strip) => strip.id === stripId);
       if (strip) {
         strip.nodes = strip.nodes.filter((node) => node.id !== nodeId);
+        console.log(strip?.nodes);
       }
     },
     updateNode(state, action) {
