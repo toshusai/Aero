@@ -144,19 +144,6 @@ export function Timeline() {
               }
 
               return (m + 1).toFixed(0) + ".1";
-
-              if (v === 0) return "1.1";
-              if (true || nearMod(v, BPS)) {
-                return (
-                  Math.ceil((v / BPS + BPS) / measure) +
-                  "." +
-                  Math.ceil((v / BPS + BPS) % (measure + 0.01)).toFixed(0)
-                );
-              }
-              function nearMod(v: number, mod: number) {
-                return Math.abs((v % mod) - mod) < 0.01;
-              }
-              return ""; //v.toFixed(2);
             }}
           />
           <TimeCursor left={currentTime * pxPerSec} top={0} />
