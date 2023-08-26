@@ -35,6 +35,9 @@ export function useCurrentTime() {
 export function snapToBeat(time: number, BPS: number) {
   return Math.floor(time * BPS) / BPS;
 }
+export function ceilToBeat(time: number, BPS: number) {
+  return Math.ceil(time * BPS) / BPS;
+}
 
 export function useIsPlaying() {
   const dispatch = useDispatch();
@@ -177,8 +180,10 @@ export function Timeline() {
       const clientX =
         ctx.event.clientX - ctx.event.target.getBoundingClientRect().left;
       const time = clientX / pxPerSec;
-      const roundTime = snapToBeat(time, BPS);
-      const length = Math.max(roundTime - ctx.pass.node.time, 1 / BPS);
+      const length = Math.max(
+        ceilToBeat(time - ctx.pass.node.time, BPS),
+        1 / BPS
+      );
       dispatch(
         actions.updateNode({
           stripId: "1",
