@@ -79,8 +79,7 @@ export function Timeline() {
   const measure = 4;
   const pxPerSec = BPS * 50;
 
-  const handleTogglePlay = async () => {
-    await Tone.start();
+  const handleTogglePlay = () => {
     setIsPlaying(!isPlaying);
     if (!isPlaying) {
       const synth = new Tone.PolySynth(Tone.Synth).toDestination();
@@ -250,7 +249,9 @@ export function Timeline() {
           />
 
           {nodes.map((node) => {
-            return <SoundNodeBox key={node.id} node={node} />;
+            return (
+              <SoundNodeBox pxPerSec={pxPerSec} key={node.id} node={node} />
+            );
           })}
           <TimeCursor left={currentTime * pxPerSec} top={-20} bottom={-2} />
         </div>
