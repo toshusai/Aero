@@ -39,11 +39,12 @@ export function Timeline() {
     setIsPlaying((isPlaying) => !isPlaying);
     if (!isPlaying) {
       const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+      const now = Tone.now();
       state.nodes.forEach((node) => {
         synth?.triggerAttackRelease(
           node.code + node.octave,
           node.length,
-          node.time + Tone.now()
+          now + node.time - currentTime
         );
       });
       setSynth(synth);
@@ -73,6 +74,17 @@ export function Timeline() {
       cancelAnimationFrame(i);
     };
   }, [isPlaying]);
+
+  const handlePointerDownTimeView = createDragPointerHandler({
+    onDown: (ctx) => {
+      if (!(ctx.event.target instanceof HTMLElement)) return;
+      const clientX =
+        ctx.event.clientX - ctx.event.target.getBoundingClientRect().left;
+      const time = clientX / pxPerSec;
+      setCurrentTime(time);
+    },
+  });
+
   const handlePointerDown = createDragPointerHandler<
     | {
         node: SoundNode;
@@ -144,6 +156,7 @@ export function Timeline() {
           <TimeView
             offsetSec={0}
             pxPerSec={pxPerSec}
+            onPointerDown={handlePointerDownTimeView}
             steps={steps}
             renderText={(v) => {
               const m = (v * BPS) / measure;
