@@ -56,7 +56,6 @@ export function Timeline() {
 
   useEffect(() => {
     if (!isPlaying) {
-      setCurrentTime(0);
       return;
     }
     let i = 0;
