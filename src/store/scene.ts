@@ -52,7 +52,6 @@ export const sceneSlice = createSlice({
       const strip = state.strips.find((strip) => strip.id === stripId);
       if (strip) {
         strip.nodes = strip.nodes.filter((node) => node.id !== nodeId);
-        console.log(strip?.nodes);
       }
     },
     updateNode(state, action) {
