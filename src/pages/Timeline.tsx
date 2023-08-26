@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
   createDragPointerHandler,
+  IconButton,
+  iconProps,
   TimeCursor,
   TimeView,
+  TransparentIconButton,
   useWidth,
 } from "@/app-ui/src";
 import * as Tone from "tone/build/esm";
@@ -15,6 +18,7 @@ import { VerticalLines } from "../components/VerticalLines";
 import { getSynth, setSynth } from ".";
 import { Strip } from "./Strip";
 import { SoundNode } from "../types/SoundNode";
+import { PlayerPlay, PlayerStop } from "tabler-icons-react";
 
 export function Timeline() {
   const [width, ref] = useWidth();
@@ -126,7 +130,13 @@ export function Timeline() {
   return (
     <div className="flex flex-col w-full">
       <div className="flex justify-center">
-        <button onClick={handleTogglePlay}>play</button>
+        <IconButton onClick={handleTogglePlay}>
+          {isPlaying ? (
+            <PlayerStop {...iconProps} />
+          ) : (
+            <PlayerPlay {...iconProps} />
+          )}
+        </IconButton>
       </div>
       <div className="flex w-full">
         <div style={{ minWidth: "70px" }}></div>
