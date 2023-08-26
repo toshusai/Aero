@@ -168,7 +168,6 @@ export function Timeline() {
               return (m + 1).toFixed(0) + ".1";
             }}
           />
-          <TimeCursor left={currentTime * pxPerSec} top={0} />
         </div>
       </div>
       <div className="flex w-full">
@@ -191,6 +190,7 @@ export function Timeline() {
           {state.nodes.map((node) => {
             return <SoundNodeBox key={node.id} node={node} />;
           })}
+          <TimeCursor left={currentTime * pxPerSec} top={-20} bottom={-2}  />
         </div>
       </div>
     </div>
